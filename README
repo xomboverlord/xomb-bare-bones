@@ -1,0 +1,129 @@
+This is the XOmB-barebones distribution. It comes with the bare minimum needed to get a booting OS in D.
+
+Except we added kprintfln. You're welcome.
+
+The updated version of this file is kept on our wiki, located here:
+http://wiki.xomb.org/index.php?title=XOmB_Bare_Bones
+
+Don't expect this to be kept as up to date. We'll try, but the newest version will always be on the wiki, so check there.
+
+The XOmB Bare Bones distribution is a minimal 64 bit OS written in D, distilled from the main project by [[User:Wilkie|wilkie]] and [[User:Steveklabnik|Steve Klabnik]].
+
+
+== About ==
+The [http://wiki.osdev.org osdev wiki] has a page called [http://wiki.osdev.org/Bare_Bones Bare Bones]. On it, they show how to make a minimal OS written in the C programming language. When we started [http://forum.osdev.org/viewtopic.php?f=15&t=18914 discussing programming an OS in D], some people indicated an interest in having a similar example, but in the D language.
+
+We decided to oblige. We've distilled a minimal OS out of XOmB, and are releasing it as the "XOmB Bare Bones" distribution.
+
+== Get XBB ==
+The git repository is located [http://github.com/xomboverlord/xomb-bare-bones/tree/master here]. If you haven't used git before, check out our [[Using Git]] tutorial.
+
+The short lowdown:
+
+git clone git://github.com/xomboverlord/xomb-bare-bones.git
+
+
+== Using XBB ==
+
+First, a small word about compilers: GDC is dead. Unfortunatly, LDC isn't quite up to snuff yet, and while it's being worked on, unfortunatly, we have to stick with GDC. Expect things to get better in this area soon.
+
+The first thing that you need to do in order to use XBB is create a cross compiler. Unfortunatly, our wiki is sparse on this subject at the moment, and so is the [http://wiki.osdev.org/GDC_Cross-Compiler osdev wiki]... we're sorry. That's coming soon.
+
+After you have that up and running, you need to add a profile. We use dsss/rebuild to build stuff, and when we did it, it installed to /opt/etc/. So copy the gdc-xomb file from build/ (in the xomb-bare-bones directory) to /opt/etc/rebuild/ and you should be golden. Hopefully.
+
+To build, just run
+<pre>dsss build</pre> from within the build/ directory. This will make 'xomb.iso'. Then feel free to run it with bochs, xen, or whatever.
+
+And that's it! Pretty easy, right?
+
+== XBB Features ==
+Considering that XBB is, well, bare-bones, it doesn't do much. kmain consists of one kprintfln! statement, which just prints a line to the screen. We've included a kprintfln! implementation to show off the power of D's templating system, but feel free to replace it, of course.
+
+== XBB Organization ==
+
+The XBB directory looks like this:
+$ tree -L 1
+.
+|-- LICENSE
+|-- README
+|-- build
+|-- kernel
+
+2 directories, 2 files
+
+We've moved all of the source into kernel, because you (at some point) will want to write userspace code. You'd probably want to make another directory in the main tree with all of that code in it. The main XOmB project has libos/ and tools/ and such.
+
+=== LICENSE ===
+XBB is distributed under the [http://sam.zoy.org/wtfpl/ WTFPL]. This is the most free license we could possibly imagine that still contains a swear word, so have at it.
+
+=== README ===
+The readme contains a copy of this page, though it's not updated quite as often as this page is.
+
+=== build/ ===
+$ tree -L 1 build/
+build/
+|-- bochsrc
+|-- dsss.conf
+|-- dsss.last
+|-- dsss_objs
+|-- iso
+|-- linker.ld
+|-- xomb.dump
+`-- xomb.iso
+
+2 directories, 6 files
+==== bochsrc ====
+Assuming you're running bochs, we've given you a bochsrc.
+
+==== dsss.conf ====
+This file tells dsss how to build XBB.
+
+==== dsss.last ====
+This is another file that dsss generates.
+
+==== dsss_objs ====
+This directory contains all of the intermediate stuff that dsss needs to do its job.
+
+==== iso ====
+This directory contains a copy of the actual FS contained in xomb.iso.
+
+==== linker.ld ====
+This script lets ld know how it should link everything together.
+
+==== xomb.dump ====
+A dump of the iso. Very useful for seeing exactly what asm gets generated after compiling things.
+
+==== xomb.iso ====
+This is the actual .iso file that needs to be burnt to a CD (or run in some other manner) to run the OS!
+
+=== kernel/ ===
+$ tree -L 1 kernel/
+kernel/
+|-- arch
+|-- config.d
+|-- core
+|-- dev
+`-- runtime
+
+4 directories, 1 file
+
+==== arch ====
+This directory contains everything pertaining to architecture. If you wanted to port XBB to arm or something, the code would go in here.
+
+==== config.d ====
+This sets a bunch of configuration options, mostly relating to debugging information.
+
+==== core ====
+This is where it all goes down. The core kernel code is located inside.
+
+==== dev ====
+Everything in this directory pertains to devices.
+
+==== runtime ====
+The kernel D runtime. This runtime is nowhere near robust as a full userspace runtime would be, as the kernel donesn't need such niceties as garbage collection. Just the bare minimum, thanks.
+
+== For More Info ==
+Check out the individual source files for information on how specific things work. We've made an attempt to heavily comment everything, so that you can see in the code itself how things work.
+
+If you find that you need more help, please [[Contact |contact]] us, and we'll do our best. Please let us know if there's anything that we can do to make this project better!
+

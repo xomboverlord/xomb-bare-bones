@@ -2,3 +2,4 @@ dsss_objs/*
 dsss.last
 xomb.dump
 xomb.iso
+iso/boot/xomb

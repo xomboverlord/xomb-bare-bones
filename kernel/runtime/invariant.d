@@ -5,7 +5,7 @@
  * www.digitalmars.com
  */
 
-void _d_invariant(Object o)
+extern(C) void _d_invariant(Object o)
 {
 	ClassInfo c;
 
@@ -15,7 +15,7 @@ void _d_invariant(Object o)
 	assert(o !is null); // just do null check, not invariant check
 
 	c = o.classinfo;
-	
+
 	do
 	{
 		if(c.classInvariant)

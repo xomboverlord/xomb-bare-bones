@@ -11,12 +11,18 @@ import kernel.runtime.util;
 import kernel.core.kprintf;
 
 // magical gcc business (BEWARE THE MAGICAL EMPTY FILE!!!)
-static import gcc.builtins;
+version(GNU)
+{
+	static import gcc.builtins;
+}
 
 extern(C)
 {
 
-alias gcc.builtins.__builtin_alloca alloca;
+version(GNU)
+{
+	alias gcc.builtins.__builtin_alloca alloca;
+}
 
 private
 {
@@ -377,6 +383,7 @@ mixin(Stub!("void _d_delinterface(void** p)"));
 mixin(Stub!("void _d_delclass(Object* p)"));
 mixin(Stub!("Array _d_newarrayT(TypeInfo ti, size_t length)"));
 mixin(Stub!("Array _d_newarrayiT(TypeInfo ti, size_t length)"));
+mixin(Stub!("Array _d_newarrayvT(TypeInfo ti, size_t length)"));
 mixin(Stub!("void[] _d_newarraymTp(TypeInfo ti, int ndims, size_t* pdim)"));
 mixin(Stub!("void[] _d_newarraymiTp(TypeInfo ti, int ndims, size_t* pdim)"));
 mixin(Stub!("void _d_delarray(Array *p)"));
@@ -390,6 +397,77 @@ mixin(Stub!("byte[] _d_arrayappendcTp(TypeInfo ti, inout byte[] x, void *argp)")
 mixin(Stub!("byte[] _d_arraycatT(TypeInfo ti, byte[] x, byte[] y)"));
 mixin(Stub!("byte[] _d_arraycatnT(TypeInfo ti, uint n, ...)"));
 mixin(Stub!("Array _adDupT(TypeInfo ti, Array a)"));
+
+void[] _d_arraycase(uint tsize, uint fsize, void[] a)
+{
+	uint length = a.length;
+	uint nbytes;
+
+	nbytes = length * fsize;
+	if (nbytes % tsize != 0)
+	{
+		// throw new Error ("array case misalignment");
+	}
+
+	length = nbytes / tsize;
+	*cast(uint *)&a = length;
+	return a;
+}
+
+template ArrayInit(char[] name, char[] type)
+{
+	const char[] ArrayInit = `
+
+		void _d_array_init_` ~ name ~ `(` ~ type ~ `* a, size_t n, ` ~ type ~ ` v)
+		{
+			auto p = a;
+			auto end = a + n;
+
+			while (p !is end)
+			{
+				*p++ = v;
+			}
+		}
+
+		`;
+}
+
+mixin(ArrayInit!("i1", "bool"));
+mixin(ArrayInit!("i8", "ubyte"));
+mixin(ArrayInit!("i16", "ushort"));
+mixin(ArrayInit!("i32", "uint"));
+mixin(ArrayInit!("i64", "ulong"));
+mixin(ArrayInit!("float", "float"));
+mixin(ArrayInit!("double", "double"));
+mixin(ArrayInit!("pointer", "void*"));
+
+void _d_array_init_mem(void* a, size_t na, void* v, size_t nv)
+{
+	auto p = a;
+	auto end = a + na * nv;
+
+	while (p !is end) {
+
+		memcpy(p,v,nv);
+		p+=nv;
+
+	}
+}
+
+// for array cast
+size_t _d_array_cast_len(size_t len, size_t elemsz, size_t newelemsz)
+{
+	if (newelemsz == 1)
+	{
+		return len*elemsz;
+	}
+	else if (len % newelemsz)
+	{
+		// throw new Exception("Bad array case");
+	}
+
+	return (len*elemsz)/newelemsz;
+}
 
 /**************************************************
  GC stubs
@@ -441,25 +519,25 @@ void _d_switch_error( char[] file, uint line )
 
 private void onAssertError(char[] file, size_t line)
 {
-	kprintfln!("Error in {}, line {}: assertion failed.")(file, line);
+	kprintfln!("Error in {}, line {}: assertion failed.")(file, "line");
 	asm { l: hlt; jmp l; }
 }
 
 private void onAssertErrorMsg(char[] file, size_t line, char[] msg)
 {
-	kprintfln!("Error in {}, line {}: assertion failed: \"{}\"")(file, line, msg);
+	kprintfln!("Error in {}, line {}: assertion failed: \"{}\"")(file, "line", msg);
 	asm { l: hlt; jmp l; }
 }
 
 private void onArrayBoundsError(char[] file, size_t line)
 {
-	kprintfln!("Error in {}, line {}: array index out of bounds.")(file, line);
+	kprintfln!("Error in {}, line {}: array index out of bounds.")(file, "line");
 	asm { l: hlt; jmp l; }
 }
 
 private void onSwitchError(char[] file, size_t line)
 {
-	kprintfln!("Error in {}, line {}: switch has no case or default to handle the switched-upon value.")(file, line);
+	kprintfln!("Error in {}, line {}: switch has no case or default to handle the switched-upon value.")(file, "line");
 	asm { l: hlt; jmp l; }
 }
 
@@ -828,7 +906,12 @@ Array _adReverse(Array a, size_t szelem)
 
 		tmp = buffer.ptr;
 		if (szelem > 16)
-			tmp = cast(byte*)alloca(szelem);
+		{
+			version(GNU)
+			{
+				tmp = cast(byte*)alloca(szelem);
+			}
+		}
 
 		for (; lo < hi; lo += szelem, hi -= szelem)
 		{
@@ -1010,5 +1093,8 @@ byte[] _d_arraycopy(size_t size, byte[] from, byte[] to)
 
 	return to;
 }
+
+mixin(Stub!("Object _d_allocclass(ClassInfo ci)"));
+mixin(Stub!("void _d_throw_exception(Object e)"));
 
 }

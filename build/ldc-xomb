@@ -1,0 +1,20 @@
+profile=phobos
+
+compiler=ldc
+
+exeext=
+objext=o
+
+
+
+version=LDC
+
+[compile]
+cmd=ldc -nodefaultlib -g -I../kernel/runtime/ -c $i
+
+[link]
+cmd=#
+
+[postlink]
+cmd=echo "lol fuckers"
+

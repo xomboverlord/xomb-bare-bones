@@ -38,6 +38,11 @@ module object;
 // Imports necessary routines used by the runtime
 import kernel.runtime.util;
 
+//version(LDC)
+//{
+	import std.moduleinit;
+//}
+
 extern(C) Object _d_newclass(ClassInfo ci);
 
 /// Standard boolean type.
@@ -308,6 +313,30 @@ class ClassInfo : Object
 		return o;
 	}
 }
+
+
+//version(LDC){
+
+class ModuleInfo : Object
+{
+    char[] name;
+    ModuleInfo[] importedModules;
+    ClassInfo[] localClasses;
+
+    uint flags;     // initialization state
+
+    void function() ctor;
+    void function() dtor;
+    void function() unitTest;
+    void* xgetMembers;
+    void function() ictor;
+
+    // Return collection of all modules in the program.
+    static int opApply(int delegate(ref ModuleInfo));
+}
+
+//}
+
 
 //private import std.string;
 

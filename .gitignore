@@ -1,0 +1,7 @@
+build/dsss_objs/*
+build/dsss_imports/*
+build/dsss.last
+build/xomb.dump
+build/xomb.iso
+build/iso/boot/xomb
+*.swp

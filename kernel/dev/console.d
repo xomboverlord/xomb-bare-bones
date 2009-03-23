@@ -36,7 +36,7 @@ public:
 	// The default color.
 	const ubyte DEFAULTCOLORS = Color.LightGray;
 
-	ubyte* videoMemoryLocation = cast(ubyte*)0xFFFFFFFF800B8000;
+	ubyte* videoMemoryLocation = cast(ubyte*)0xFFFF8000000B8000;
 
 	// The cursor position
 	private int xpos = 0;

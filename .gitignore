@@ -4,4 +4,5 @@ build/dsss.last
 build/xomb.dump
 build/xomb.iso
 build/iso/boot/xomb
+build/dsss.conf
 *.swp

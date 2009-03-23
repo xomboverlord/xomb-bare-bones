@@ -12,7 +12,8 @@ module kernel.core.kmain;
 // This module contains our powerful kprintf function
 import kernel.core.kprintf;
 
-
+// This module contains the architecture specific modules
+import architecture;
 
 
 

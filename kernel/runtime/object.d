@@ -44,6 +44,7 @@ import kernel.runtime.util;
 //}
 
 extern(C) Object _d_newclass(ClassInfo ci);
+extern(C) Object _d_allocclass(ClassInfo ci);
 
 /// Standard boolean type.
 alias bool bit;
@@ -277,15 +278,15 @@ class ClassInfo : Object
 	//	8:						// has constructors
 	void *deallocator;
 	OffsetTypeInfo[] offTi;
-	void function(Object) defaultConstructor;	// default Constructor
+	void* defaultConstructor;	// default Constructor
 
 	/*************
 	 * Search all modules for ClassInfo corresponding to classname.
 	 * Returns: null if not found
 	 */
-	/*static ClassInfo find(char[] classname)
+	static ClassInfo find(char[] classname)
 	{
-		foreach (m; ModuleInfo.modules())
+		/*foreach (m; ModuleInfo)
 		{
 			//writefln("module %s, %d", m.name, m.localClasses.length);
 			foreach (c; m.localClasses)
@@ -294,15 +295,16 @@ class ClassInfo : Object
 				if (c.name == classname)
 					return c;
 			}
-		}
+		}*/
 		return null;
-	}*/
+	}
 
 	/********************
 	 * Create instance of Object represented by 'this'.
 	 */
 	Object create()
 	{
+		/*
 		if (flags & 8 && !defaultConstructor)
 			return null;
 		Object o = _d_newclass(this);
@@ -310,7 +312,20 @@ class ClassInfo : Object
 		{
 			defaultConstructor(o);
 		}
-		return o;
+		return o;*/
+        if (flags & 8 && !defaultConstructor)
+            return null;
+
+        Object o = _d_allocclass(this);
+        // initialize it
+        (cast(byte*) o)[0 .. init.length] = init[];
+
+        if (flags & 8 && defaultConstructor)
+        {
+            auto ctor = cast(Object function(Object))defaultConstructor;
+            return ctor(o);
+        }
+        return o;
 	}
 }
 

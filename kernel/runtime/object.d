@@ -279,6 +279,7 @@ class ClassInfo : Object
 	void *deallocator;
 	OffsetTypeInfo[] offTi;
 	void* defaultConstructor;	// default Constructor
+	TypeInfo typeinfo;
 
 	/*************
 	 * Search all modules for ClassInfo corresponding to classname.

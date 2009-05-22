@@ -519,25 +519,25 @@ void _d_switch_error( char[] file, uint line )
 
 private void onAssertError(char[] file, size_t line)
 {
-	kprintfln!("Error in {}, line {}: assertion failed.")(file, "line");
+	kprintfln!("Error in {}, line {}: assertion failed.")(file, line);
 	asm { l: hlt; jmp l; }
 }
 
 private void onAssertErrorMsg(char[] file, size_t line, char[] msg)
 {
-	kprintfln!("Error in {}, line {}: assertion failed: \"{}\"")(file, "line", msg);
+	kprintfln!("Error in {}, line {}: assertion failed: \"{}\"")(file, line, msg);
 	asm { l: hlt; jmp l; }
 }
 
 private void onArrayBoundsError(char[] file, size_t line)
 {
-	kprintfln!("Error in {}, line {}: array index out of bounds.")(file, "line");
+	kprintfln!("Error in {}, line {}: array index out of bounds.")(file, line);
 	asm { l: hlt; jmp l; }
 }
 
 private void onSwitchError(char[] file, size_t line)
 {
-	kprintfln!("Error in {}, line {}: switch has no case or default to handle the switched-upon value.")(file, "line");
+	kprintfln!("Error in {}, line {}: switch has no case or default to handle the switched-upon value.")(file, line);
 	asm { l: hlt; jmp l; }
 }
 
@@ -1025,7 +1025,7 @@ Array _adSort(Array a, TypeInfo ti)
 				do
 					ri -= elem_size;
 				while (ti.compare(ri, lbound) > 0);
-				if (li > ri)
+if (li > ri)
 					break;
 				ti.swap(li, ri);
 			}
@@ -1075,7 +1075,7 @@ void[] _d_arraycast(size_t tsize, size_t fsize, void[] a)
 	auto nbytes = length * fsize;
 
 	if(nbytes % tsize != 0)
-		throw new Exception("array cast misalignment");
+		assert (0, "array cast misalignment");
 
 	length = nbytes / tsize;
 	*cast(size_t *)&a = length; // jam new length
@@ -1085,13 +1085,23 @@ void[] _d_arraycast(size_t tsize, size_t fsize, void[] a)
 byte[] _d_arraycopy(size_t size, byte[] from, byte[] to)
 {
 	if(to.length != from.length)
-		throw new Exception("lengths don't match for array copy");
+		assert (0, "lengths don't match for array copy");
 	else if(cast(byte *)to + to.length * size <= cast(byte *)from || cast(byte *)from + from.length * size <= cast(byte *)to)
 		memcpy(cast(byte *)to, cast(byte *)from, to.length * size);
 	else
-		throw new Exception("overlapping array copy");
+		assert (0, "overlapping array copy");
 
 	return to;
+}
+
+void _d_array_slice_copy(void* dst, size_t dstlen, void* src, size_t srclen)
+{
+	if (dstlen != srclen)
+		assert(0, "lengths don't match for array copy");
+	else if (dst+dstlen <=src || src+srclen <= dst)
+		memcpy(dst, src, dstlen);
+	else
+		assert(0, "overlapping array copy");
 }
 
 mixin(Stub!("Object _d_allocclass(ClassInfo ci)"));

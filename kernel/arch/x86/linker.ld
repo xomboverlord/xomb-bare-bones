@@ -17,7 +17,7 @@
  *
  */
 
-kernel_VMA = 0xffff800000000000;
+kernel_VMA = 0x100000;
 kernel_LMA = 0x100000;
 
 /* start from the entry point */
@@ -27,14 +27,14 @@ SECTIONS
     /* link from LMA */
     . = kernel_LMA;
 
-	_boot = .;
-
 	_kernelLMA = .;
+
+	_boot = .;
 
     /* boot.S is ran in linear addresses */
     .text_boot :
     {
-        dsss_objs/O/kernel.arch.x86_64.boot.boot.o (.text)
+        dsss_objs/O/kernel.arch.x86.boot.boot.o (.text)
     }
 
 	_eboot = .;

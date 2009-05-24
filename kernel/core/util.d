@@ -189,7 +189,7 @@ template isPointerType(T)
 
 template isPointerType(T : T*)
 {
-	const bool isPointerType = true;	
+	const bool isPointerType = true;
 }
 
 /**
@@ -363,7 +363,7 @@ char[] itoa(char[] buf, char base, long d)
 	if(base == 'd' && d < 0)
 	{
 		negative = true;
-		ud = -d;
+		ud = 0 - d;
 	}
 	else if(base == 'x')
 		divisor = 16;

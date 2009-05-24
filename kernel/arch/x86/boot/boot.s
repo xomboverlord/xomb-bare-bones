@@ -59,8 +59,19 @@ _start:
 	mov esp, stack+STACK_SIZE
 
 	; pass multiboot information
-	push eax
 	push ebx
+	push eax
+
+	; enable SSE
+	mov ecx, cr0
+	btr ecx, 2	; clear CR0.EM bit
+	bts ecx, 1	; set CR0.MP bit
+	mov cr0, ecx
+
+	mov ecx, cr4
+	bts ecx, 9	; set CR4.OSFXSR bit
+	bts ecx, 10	; set CR4.OSXMMEXCPT bit
+	mov cr4, ecx
 
 	; call kmain
 	call kmain

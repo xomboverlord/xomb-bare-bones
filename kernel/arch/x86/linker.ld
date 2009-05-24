@@ -21,6 +21,8 @@ kernel_VMA = 0x100000;
 kernel_LMA = 0x100000;
 
 /* start from the entry point */
+
+OUTPUT_FORMAT("elf32-i386")
 ENTRY(_start)
 SECTIONS
 {

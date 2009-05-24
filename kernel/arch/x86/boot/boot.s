@@ -20,10 +20,10 @@ bits 32
 ; externs given by the linker script
 extern _edata
 extern _end
+extern _boot
 
-; extern to the load.s
-extern start64
-extern stack
+; extern for kmain
+extern kmain
 
 ; other definitions
 
@@ -32,14 +32,6 @@ extern stack
 ; define the starting point for this module
 global start
 global _start
-start:
-_start:
-
-	; Stash values for multiboot we won't touch until 64 bit mode
-	mov esi, ebx
-	mov edi, eax
-
-	jmp start32
 
 	; the multiboot header needs to be aligned at
 	; a 32 bit boundary
@@ -51,23 +43,40 @@ _start:
 	dd MULTIBOOT_HEADER_FLAGS
 	dd -(MULTIBOOT_HEADER_MAGIC + MULTIBOOT_HEADER_FLAGS)
 	dd multiboot_header
-	dd _start
+	dd _boot
 	dd _edata
 	dd _end
 	dd _start
 
 ; the 32 bit entry
-global start32
-start32:
+start:
+_start:
 
 	; disable interrupts
 	cli
 
-_loop:
-	jmp _loop
+	; establish stack (point to bottom)
+	mov esp, stack+STACK_SIZE
+
+	; pass multiboot information
+	push eax
+	push ebx
+
+	; call kmain
+	call kmain
+
+_halt:
+
+	cli
+
+	hlt
+	jmp _halt
+
 	nop
 	nop
-	nop
-	nop
-	nop
-	nop
+
+section .bss
+align 32
+stack:
+	resb STACK_SIZE
+
